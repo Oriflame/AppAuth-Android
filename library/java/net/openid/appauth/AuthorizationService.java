@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -42,6 +43,7 @@ import net.openid.appauth.browser.CustomTabManager;
 import net.openid.appauth.connectivity.ConnectionBuilder;
 import net.openid.appauth.internal.Logger;
 import net.openid.appauth.internal.UriUtil;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -483,9 +485,28 @@ public class AuthorizationService {
      * callback handler.
      */
     public void performTokenRequest(
-            @NonNull TokenRequest request,
-            @NonNull TokenResponseCallback callback) {
+        @NonNull TokenRequest request,
+        @NonNull TokenResponseCallback callback) {
         performTokenRequest(request, NoClientAuthentication.INSTANCE, callback);
+    }
+
+    public void performTokenRequest(
+            @NonNull TokenRequest request,
+            @NonNull ClientAuthentication clientAuthentication,
+            @NonNull TokenResponseCallback callback) {
+        performTokenRequest(request, clientAuthentication, callback, false);
+    }
+
+    /**
+     * Sends a request to the authorization service to exchange a code granted as part of an
+     * authorization request for a token. The result of this request will be sent to the provided
+     * callback handler.
+     */
+    public void performTokenRequest(
+            @NonNull TokenRequest request,
+            @NonNull Boolean isExpirationValidationDisabled,
+            @NonNull TokenResponseCallback callback) {
+        performTokenRequest(request, NoClientAuthentication.INSTANCE, callback, isExpirationValidationDisabled);
     }
 
     /**
@@ -496,7 +517,9 @@ public class AuthorizationService {
     public void performTokenRequest(
             @NonNull TokenRequest request,
             @NonNull ClientAuthentication clientAuthentication,
-            @NonNull TokenResponseCallback callback) {
+            @NonNull TokenResponseCallback callback,
+            @NonNull Boolean isExpirationValidationDisabled
+            ) {
         checkNotDisposed();
         Logger.debug("Initiating code exchange request to %s",
                 request.configuration.tokenEndpoint);
@@ -506,7 +529,8 @@ public class AuthorizationService {
                 mClientConfiguration.getConnectionBuilder(),
                 SystemClock.INSTANCE,
                 callback,
-                mClientConfiguration.getSkipIssuerHttpsCheck())
+                mClientConfiguration.getSkipIssuerHttpsCheck(),
+                isExpirationValidationDisabled)
                 .execute();
     }
 
@@ -585,6 +609,7 @@ public class AuthorizationService {
         private TokenResponseCallback mCallback;
         private Clock mClock;
         private boolean mSkipIssuerHttpsCheck;
+        private boolean mIsExpirationValidationDisabled;
 
         private AuthorizationException mException;
 
@@ -593,13 +618,15 @@ public class AuthorizationService {
                          @NonNull ConnectionBuilder connectionBuilder,
                          Clock clock,
                          TokenResponseCallback callback,
-                         Boolean skipIssuerHttpsCheck) {
+                         Boolean skipIssuerHttpsCheck,
+                         Boolean isExpirationValidationDisabled) {
             mRequest = request;
             mClientAuthentication = clientAuthentication;
             mConnectionBuilder = connectionBuilder;
             mClock = clock;
             mCallback = callback;
             mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
+            mIsExpirationValidationDisabled = isExpirationValidationDisabled;
         }
 
         @Override
@@ -710,7 +737,8 @@ public class AuthorizationService {
                     idToken.validate(
                             mRequest,
                             mClock,
-                            mSkipIssuerHttpsCheck
+                            mSkipIssuerHttpsCheck,
+                            mIsExpirationValidationDisabled
                     );
                 } catch (AuthorizationException ex) {
                     mCallback.onTokenRequestCompleted(null, ex);
