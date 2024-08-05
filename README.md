@@ -1,3 +1,5 @@
+[Oriflame Wiki](https://dev.azure.com/oriflame/MV7/_wiki/wikis/MV7.wiki/10963/oAuth)
+
 ![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
 
 [![Download](https://img.shields.io/maven-central/v/net.openid/appauth)](https://search.maven.org/search?q=g:net.openid%20appauth)
