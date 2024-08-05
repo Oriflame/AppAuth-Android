@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/openid/AppAuth-Android/actions/workflows/build.yml/badge.svg)](https://github.com/openid/AppAuth-Android/actions/workflows/build.yml)
 [![codecov.io](https://codecov.io/github/openid/AppAuth-Android/coverage.svg?branch=master)](https://codecov.io/github/openid/AppAuth-Android?branch=master)
 
-XXX AppAuth for Android is a client SDK for communicating with
+AppAuth for Android is a client SDK for communicating with
 [OAuth 2.0](https://tools.ietf.org/html/rfc6749) and
 [OpenID Connect](http://openid.net/specs/openid-connect-core-1_0.html) providers.
 It strives to
